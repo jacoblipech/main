@@ -649,7 +649,7 @@ The sorting process is case insensitive.
 **Cons:** There is no way to obtain the original list of contacts for other functions. If a mistake is made, the original list of contacts will be compromised. There is a need to update all classes that inherits from `AddressBook` class which may be confusing.
 
 // end::sort[]
-// birthday: birthday[]
+// tag::birthday[]
 === Birthday mechanism (Since v1.3)
 The birthday mechanism is achieved by the `AddBirthdayCommand`. In order to add a birthday value to a contact, the default constructor of `AddBirthdayCommand`
 takes in the index of the contact and the birthday value to be added to the contact.

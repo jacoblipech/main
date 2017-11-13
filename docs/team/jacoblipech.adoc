@@ -67,19 +67,19 @@ Hence you would not want to miss out any of these days. This birthday command al
 
 ---
 
-It has strict implementation of the date being entered. It ensures that the date entered by the user is valid. +
-On top of that, birthday assigns each contact the date entered or a default "No Birthday Added" will be shown.
-A contact's birthday can be added using the add or birthday command. Eventually, you can simply change someone's birthday using the edit command.
+#Start of Extract [from: Developer Guide]#
+
+include::../DeveloperGuide.adoc[tag=birthday]
+
+#End of Extract#
 
 ---
 
 === Other contributions
 
-* Made tags in UniCity to show different colors. (Pull requests https://github.com/CS2103AUG2017-W13-B1/main/pull/59 [#59])
-* Made error message to show a different color in UniCity. (Pull requests https://github.com/CS2103AUG2017-W13-B1/main/pull/60 [#60])
-* Made address, email and birthday optional fields in UniCity. (Pull requests https://github.com/CS2103AUG2017-W13-B1/main/pull/77 [#77])
-* Enhanced UI in UniCity by adding another panel to show more information about a contact. (Pull requests https://github.com/CS2103AUG2017-W13-B1/main/pull/100 [#100])
-
-== Project: PowerPointLabs
-
-{Optionally (not graded), you may include other projects in your portfolio.}
+* Made tags in UniCity to show different colors. (Pull request https://github.com/CS2103AUG2017-W13-B1/main/pull/59 [#59])
+* Made error message to show a different color in UniCity. (Pull request https://github.com/CS2103AUG2017-W13-B1/main/pull/60 [#60])
+* Added birthday field to add and edit command to make changes there as well (Pull request https://github.com/CS2103AUG2017-W13-B1/main/pull/61 [61])
+* Made address, email and birthday optional fields in UniCity. (Pull request https://github.com/CS2103AUG2017-W13-B1/main/pull/77 [#77])
+* Enhanced UI in UniCity by adding another panel to show more information about a contact. (Pull request https://github.com/CS2103AUG2017-W13-B1/main/pull/100 [#100])
+* Added a calendar view panel to show all the calendars and the box will display red color if someone's birthday lies on it. The user can details of the person with birthday on that day by clicking on the box. (Pull request https://github.com/CS2103AUG2017-W13-B1/main/pull/132 [#132])
