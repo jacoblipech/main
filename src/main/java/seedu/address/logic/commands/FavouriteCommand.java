@@ -26,7 +26,7 @@ public class FavouriteCommand extends Command {
     public static final String MESSAGE_USAGE = COMMAND_WORD_1 + ": Mark the person as favourite "
             + "by the index number used in the last person listing.\n"
             + "Parameters: INDEX (must be a positive integer)\n"
-            + "Example: " + COMMAND_WORD_1
+            + "Example: " + COMMAND_WORD_1 + " 1"
             + " OR "
             + COMMAND_WORD_2 + " 1 ";
 

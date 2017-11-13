@@ -433,9 +433,7 @@ Format: +
 Examples:
 
 * `locate 3`
-Finds the address of the person from the 3rd
-
- contact in the latest listing on Google Maps as shown in figure 9.
+Finds the address of the person from the 3rd contact in the latest listing on Google Maps as shown in figure 9.
 
 image::locate-command-ui.png[width="790"]
 Figure 9: UI for locate command
