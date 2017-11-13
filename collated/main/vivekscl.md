@@ -1,629 +1,15 @@
 # vivekscl
-###### \java\seedu\address\commons\events\ui\ChangeWindowSizeRequestEvent.java
-``` java
-/**
- * Indicates a request for a change in window size.
- */
-public class ChangeWindowSizeRequestEvent extends BaseEvent {
-
-    private double windowWidth;
-    private double windowHeight;
-
-    public ChangeWindowSizeRequestEvent(double windowWidth, double windowHeight) {
-        this.windowWidth = windowWidth;
-        this.windowHeight = windowHeight;
-    }
-
-    public double getWindowWidth() {
-        return windowWidth;
-    }
-
-    public double getWindowHeight() {
-        return windowHeight;
-    }
-
-    @Override
-    public String toString() {
-        return this.getClass().getSimpleName();
-    }
-}
-```
-###### \java\seedu\address\logic\commands\AddTagCommand.java
-``` java
-/**
- * Adds a tag to the identified persons using the last displayed indexes from the address book.
- */
-public class AddTagCommand extends UndoableCommand {
-
-    public static final String COMMAND_WORDVAR_1 = "addtag";
-    public static final String COMMAND_WORDVAR_2 = "at";
-
-    public static final String MESSAGE_USAGE = COMMAND_WORDVAR_1
-            + " OR "
-            + COMMAND_WORDVAR_2
-            + ": Adds the given tag to the persons identified by the list of index numbers used in the last person "
-            + "listing."
-            + " Command is case-sensitive. \n"
-            + "Parameters: "
-            + "[INDEX] [MORE INDEXES] (every index must be a positive integer) "
-            + "[" + PREFIX_TAG + "TAG]...\n"
-            + "Example 1: " + COMMAND_WORDVAR_1 + " 1 2 3 t/friends \n"
-            + "Example 2: " + COMMAND_WORDVAR_2.toUpperCase() + " 2 5 t/classmate \n";
-
-    public static final String MESSAGE_ADD_TAG_SUCCESS = "Added Tag: %1$s";
-    public static final String MESSAGE_DUPLICATE_PERSON = "This person already exists in the address book.";
-    public static final String MESSAGE_DUPLICATE_TAG = "This tag already exists in all of the given persons.";
-
-    private final ArrayList<Index> targetIndexes;
-    private final Tag tagToAdd;
-
-    /**
-     * @param targetIndexes of the persons in the filtered person list to edit
-     * @param tagToAdd tag to add to given target indexes
-     */
-    public AddTagCommand(ArrayList<Index> targetIndexes, Tag tagToAdd) {
-
-        requireNonNull(targetIndexes);
-        requireNonNull(tagToAdd);
-
-        this.targetIndexes = targetIndexes;
-        this.tagToAdd = tagToAdd;
-    }
-
-    /**
-     * Adds the tag to add to each target person that doesn't have the given tag.
-     */
-    @Override
-    public CommandResult executeUndoableCommand() throws CommandException {
-
-        List<ReadOnlyPerson> lastShownList = model.getFilteredPersonList();
-
-        targetIndexesOutOfBoundsChecker(lastShownList);
-        tagInAllTargetIndexesChecker(lastShownList);
-
-        try {
-            model.addTag(this.targetIndexes, this.tagToAdd);
-        } catch (DuplicatePersonException dpe) {
-            throw new CommandException(MESSAGE_DUPLICATE_PERSON);
-        } catch (PersonNotFoundException pnfe) {
-            throw new AssertionError("The target person cannot be missing");
-        }
-
-        return new CommandResult(String.format(MESSAGE_ADD_TAG_SUCCESS, tagToAdd));
-    }
-
-    /**
-     * Checks if all target indexes are not out of bounds.
-     */
-    private void targetIndexesOutOfBoundsChecker(List<ReadOnlyPerson> lastShownList) throws CommandException {
-        for (Index index : targetIndexes) {
-            if (index.getZeroBased() >= lastShownList.size()) {
-                throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
-            }
-        }
-    }
-
-    /**
-     * Checks if the tag exists in all of the given target indexes.
-     */
-    private void tagInAllTargetIndexesChecker(List<ReadOnlyPerson> lastShownList) throws CommandException {
-        for (Index index : targetIndexes) {
-            int targetIndex = index.getZeroBased();
-            ReadOnlyPerson readOnlyPerson = lastShownList.get(targetIndex);
-            if (!readOnlyPerson.getTags().contains(tagToAdd)) {
-                return;
-            }
-        }
-        throw new CommandException(MESSAGE_DUPLICATE_TAG);
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        // short circuit if same object
-        if (other == this) {
-            return true;
-        }
-
-        // instanceof handles nulls
-        if (!(other instanceof AddTagCommand)) {
-            return false;
-        }
-
-        // state check
-        AddTagCommand e = (AddTagCommand) other;
-        return targetIndexes.equals(e.targetIndexes)
-                && tagToAdd.equals(e.tagToAdd);
-    }
-}
-```
-###### \java\seedu\address\logic\commands\ChangeWindowSizeCommand.java
-``` java
-/**
- * Changes the window windowSize according to predefined sizes that the user can choose from
- */
-public class ChangeWindowSizeCommand extends Command {
-
-
-    public static final String COMMAND_WORD = "ws";
-    public static final String MESSAGE_USAGE = COMMAND_WORD
-            + ": Changes window size. Command is case insensitive. "
-            + "Parameters: WINDOWSIZE (Allowed sizes are small, med, big)\n"
-            + "Example 1: " + COMMAND_WORD + " small\n"
-            + "Example 2: " + COMMAND_WORD + " big";
-
-    public static final String MESSAGE_SUCCESS = "Window sized has been changed to: ";
-
-    private final String windowSize;
-
-    public ChangeWindowSizeCommand(String windowSize) {
-        this.windowSize = windowSize;
-    }
-
-    @Override
-    public CommandResult execute() throws CommandException {
-        if (WindowSize.isValidWindowSize(windowSize)) {
-            double newWindowWidth = WindowSize.getUserDefinedWindowWidth(windowSize);
-            double newWindowHeight = WindowSize.getUserDefinedWindowHeight(windowSize);
-            EventsCenter.getInstance().post(new ChangeWindowSizeRequestEvent(newWindowWidth, newWindowHeight));
-            return new CommandResult(MESSAGE_SUCCESS + newWindowWidth + " x " + newWindowHeight);
-        } else {
-            throw new CommandException(WindowSize.MESSAGE_WINDOW_SIZE_CONSTRAINTS);
-        }
-
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        return other == this // short circuit if same object
-                || (other instanceof ChangeWindowSizeCommand // instanceof handles nulls
-                && windowSize.equals(((ChangeWindowSizeCommand) other).windowSize));
-
-    }
-}
-```
-###### \java\seedu\address\logic\commands\FindCommand.java
-``` java
-    @Override
-    public CommandResult execute() {
-        model.updateFilteredPersonList(predicate);
-        int numberOfPersonsShown = model.getFilteredPersonList().size();
-        boolean isPersonsNotFoundForGivenKeyword = numberOfPersonsShown == 0 && !predicate.getKeywords().isEmpty();
-
-        if (isPersonsNotFoundForGivenKeyword) {
-            String targets = model.getClosestMatchingName(predicate);
-            List<String> targetsAsList = Arrays.asList(targets.split("\\s+"));
-
-            if (targetsAsList.equals(predicate.getKeywords())) {
-                model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
-                return new CommandResult(String.format(Messages.MESSAGE_NO_MATCHING_NAME_FOUND, predicate));
-            }
-
-            model.updateFilteredPersonList(new NameContainsKeywordsPredicate(targetsAsList));
-            return new CommandResult(String.format(Messages.MESSAGE_NO_PERSON_FOUND, predicate,
-                    String.join(", ", targetsAsList)));
-        }
-
-        return new CommandResult(getMessageForPersonListShownSummary(numberOfPersonsShown));
-    }
-
-```
-###### \java\seedu\address\logic\commands\RedoCommand.java
-``` java
-    private final int numberOfCommands;
-
-    public RedoCommand() {
-        this(1);
-    }
-
-    public RedoCommand(int numberOfCommands) {
-        this.numberOfCommands = numberOfCommands;
-    }
-
-    @Override
-    public CommandResult execute() throws CommandException {
-        requireAllNonNull(model, undoRedoStack);
-        for (int i = 1; i <= numberOfCommands; i++) {
-            if (!undoRedoStack.canRedo()) {
-                throw new CommandException(MESSAGE_FAILURE);
-            }
-            undoRedoStack.popRedo().redo();
-        }
-
-        return new CommandResult(MESSAGE_SUCCESS);
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        return other == this // short circuit if same object
-                || (other instanceof RedoCommand // instanceof handles nulls
-                && this.numberOfCommands == ((RedoCommand) other).numberOfCommands); // state check
-    }
-
-```
-###### \java\seedu\address\logic\commands\RemoveTagCommand.java
-``` java
-/**
- * Removes a tag from identified persons using the last displayed indexes from the address book.
- */
-public class RemoveTagCommand extends UndoableCommand {
-
-    public static final String COMMAND_WORDVAR_1 = "removetag";
-    public static final String COMMAND_WORDVAR_2 = "rt";
-
-    public static final String MESSAGE_USAGE = COMMAND_WORDVAR_1
-            + " OR "
-            + COMMAND_WORDVAR_2
-            + ": Removes the given tag from identified person by the list of index numbers used in the last person "
-            + "listing."
-            + " Command is case-sensitive. \n"
-            + "Parameters: "
-            + "[INDEX] [MORE INDEXES] (every index must be a positive integer) "
-            + "[" + PREFIX_TAG + "TAG]...\n"
-            + "Example 1: " + COMMAND_WORDVAR_1 + " 1 2 3 t/friends \n"
-            + "Example 2: " + COMMAND_WORDVAR_2.toUpperCase() + " 2 5 t/classmate \n";
-
-    public static final String MESSAGE_REMOVE_TAG_SUCCESS = "Removed Tag: %1$s";
-    public static final String MESSAGE_DUPLICATE_PERSON = "This person already exists in the address book.";
-    public static final String MESSAGE_NO_SUCH_TAG = "This tag does not exist in any of the given persons.";
-
-    private final ArrayList<Index> targetIndexes;
-    private final Tag tagToRemove;
-
-    /**
-     * @param targetIndexes of the persons in the filtered person list to edit
-     * @param tagToRemove tag to remove from given target indexes
-     */
-    public RemoveTagCommand(ArrayList<Index> targetIndexes, Tag tagToRemove) {
-
-        requireNonNull(targetIndexes);
-        requireNonNull(tagToRemove);
-
-        this.targetIndexes = targetIndexes;
-        this.tagToRemove = tagToRemove;
-    }
-
-    /**
-     * Removes tag to remove from each target person that has the given tag.
-     */
-    @Override
-    public CommandResult executeUndoableCommand() throws CommandException {
-
-        List<ReadOnlyPerson> lastShownList = model.getFilteredPersonList();
-
-        targetIndexesOutOfBoundsChecker(lastShownList);
-        tagInTargetIndexesChecker(lastShownList);
-
-        try {
-            model.removeTag(this.targetIndexes, this.tagToRemove);
-        } catch (DuplicatePersonException dpe) {
-            throw new CommandException(MESSAGE_DUPLICATE_PERSON);
-        } catch (PersonNotFoundException pnfe) {
-            throw new AssertionError("The target person cannot be missing");
-        }
-
-        return new CommandResult(String.format(MESSAGE_REMOVE_TAG_SUCCESS, tagToRemove));
-    }
-
-    /**
-     * Checks if all target indexes are not out of bounds.
-     */
-    private void targetIndexesOutOfBoundsChecker(List<ReadOnlyPerson> lastShownList) throws CommandException {
-        for (Index index : targetIndexes) {
-            if (index.getZeroBased() >= lastShownList.size()) {
-                throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
-            }
-        }
-    }
-
-    /**
-     * Checks if the tag exists among the given target indexes.
-     */
-    private void tagInTargetIndexesChecker(List<ReadOnlyPerson> lastShownList) throws CommandException {
-        for (Index index : targetIndexes) {
-            int targetIndex = index.getZeroBased();
-            ReadOnlyPerson readOnlyPerson = lastShownList.get(targetIndex);
-            if (readOnlyPerson.getTags().contains(tagToRemove)) {
-                return;
-            }
-        }
-        throw new CommandException(MESSAGE_NO_SUCH_TAG);
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        // short circuit if same object
-        if (other == this) {
-            return true;
-        }
-
-        // instanceof handles nulls
-        if (!(other instanceof RemoveTagCommand)) {
-            return false;
-        }
-
-        // state check
-        RemoveTagCommand e = (RemoveTagCommand) other;
-        return targetIndexes.equals(e.targetIndexes)
-                && tagToRemove.equals(e.tagToRemove);
-    }
-}
-```
-###### \java\seedu\address\logic\commands\UndoCommand.java
-``` java
-    private final int numberOfCommands;
-
-    public UndoCommand() {
-        this(1);
-    }
-
-    public UndoCommand(int numberOfCommands) {
-        this.numberOfCommands = numberOfCommands;
-    }
-
-    @Override
-    public CommandResult execute() throws CommandException {
-        requireAllNonNull(model, undoRedoStack);
-        for (int i = 1; i <= numberOfCommands; i++) {
-            if (!undoRedoStack.canUndo()) {
-                throw new CommandException(MESSAGE_FAILURE);
-            }
-            undoRedoStack.popUndo().undo();
-        }
-
-        return new CommandResult(MESSAGE_SUCCESS);
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        return other == this // short circuit if same object
-                || (other instanceof UndoCommand // instanceof handles nulls
-                && this.numberOfCommands == ((UndoCommand) other).numberOfCommands); // state check
-    }
-
-```
-###### \java\seedu\address\logic\parser\AddTagCommandParser.java
-``` java
-/**
- * Parses input arguments and creates a new AddTagCommand object
- */
-public class AddTagCommandParser implements Parser<AddTagCommand> {
-    /**
-     * Parses the given {@code String} of arguments in the context of the AddTagCommand
-     * and returns a AddTagCommand object for execution.
-     * @throws ParseException if the user input does not conform the expected format
-     */
-    public AddTagCommand parse(String args) throws ParseException {
-        requireNonNull(args);
-        ArgumentMultimap argMultimap =
-                ArgumentTokenizer.tokenize(args, PREFIX_TAG);
-
-        if (!arePrefixesPresent(argMultimap, PREFIX_TAG)) {
-            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddTagCommand.MESSAGE_USAGE));
-        }
-
-        try {
-            String indexes = argMultimap.getPreamble();
-            ArrayList<Index> indexList = convertToArrayList(indexes);
-
-            String tagName = argMultimap.getValue(PREFIX_TAG).orElse("");
-            Tag toAdd = new Tag(tagName);
-
-            return new AddTagCommand(indexList, toAdd);
-        } catch (IllegalValueException ive) {
-            throw new ParseException(ive.getMessage(), ive);
-        }
-    }
-
-    /**
-     * Returns true if none of the prefixes contains empty {@code Optional} values in the given
-     * {@code ArgumentMultimap}.
-     */
-    private static boolean arePrefixesPresent(ArgumentMultimap argumentMultimap, Prefix... prefixes) {
-        return Stream.of(prefixes).allMatch(prefix -> argumentMultimap.getValue(prefix).isPresent());
-    }
-
-    /**
-     * Returns an ArrayList of the indexes in the given {@code String}.
-     *
-     */
-    private static ArrayList<Index> convertToArrayList(String indexes) throws IllegalValueException {
-        ArrayList<Index> indexList = new ArrayList<Index>();
-        String[] arrayOfIndexes = indexes.split(" ");
-        for (String s: arrayOfIndexes) {
-            indexList.add(ParserUtil.parseIndex(s));
-        }
-        return indexList;
-    }
-}
-```
-###### \java\seedu\address\logic\parser\ChangeWindowSizeCommandParser.java
-``` java
-/**
- * Parses input arguments and creates a new ChangeWindowSizeCommand object
- */
-public class ChangeWindowSizeCommandParser implements Parser<ChangeWindowSizeCommand> {
-
-    /**
-     * Parses the given {@code String} of arguments in the context of the ChangeWindowSizeCommand
-     * and returns an ChangeWindowSizeCommand object for execution.
-     * @throws ParseException if the user input does not conform the expected format
-     */
-    public ChangeWindowSizeCommand parse(String args) throws ParseException {
-        String trimmedArgs = args.trim();
-        if (!WindowSize.isValidWindowSize(trimmedArgs)) {
-            throw new ParseException(
-                    String.format(MESSAGE_INVALID_COMMAND_FORMAT, ChangeWindowSizeCommand.MESSAGE_USAGE));
-        }
-
-        return new ChangeWindowSizeCommand(args.trim());
-    }
-}
-```
-###### \java\seedu\address\logic\parser\RedoCommandParser.java
-``` java
-/**
- * Parses input arguments and creates a new RedoCommand object
- */
-
-public class RedoCommandParser implements Parser<RedoCommand> {
-    /**
-     * Parses the given {@code String} of arguments in the context of the seedu.address.logic.commands.RedoCommand
-     * and returns an seedu.address.logic.commands.RedoCommand object for execution.
-     * @throws ParseException if the user input does not conform the expected format
-     */
-    public RedoCommand parse(String args) throws ParseException {
-        try {
-            int numberOfCommands = Integer.parseInt(args.trim());
-            return new RedoCommand(numberOfCommands);
-        } catch (NumberFormatException ive) {
-            throw new ParseException(
-                    String.format(MESSAGE_INVALID_COMMAND_FORMAT, RedoCommand.MESSAGE_USAGE));
-        }
-    }
-}
-```
-###### \java\seedu\address\logic\parser\RemoveTagCommandParser.java
-``` java
-/**
- * Parses input arguments and creates a new RemoveTagCommand object
- */
-public class RemoveTagCommandParser implements Parser<RemoveTagCommand> {
-    /**
-     * Parses the given {@code String} of arguments in the context of the RemoveTagCommand
-     * and returns a RemoveTagCommand object for execution.
-     * @throws ParseException if the user input does not conform the expected format
-     */
-    public RemoveTagCommand parse(String args) throws ParseException {
-        requireNonNull(args);
-        ArgumentMultimap argMultimap =
-                ArgumentTokenizer.tokenize(args, PREFIX_TAG);
-
-        if (!arePrefixesPresent(argMultimap, PREFIX_TAG)) {
-            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, RemoveTagCommand.MESSAGE_USAGE));
-        }
-
-        try {
-            String indexes = argMultimap.getPreamble();
-            ArrayList<Index> indexList = convertToArrayList(indexes);
-
-            String tagName = argMultimap.getValue(PREFIX_TAG).orElse("");
-            Tag toRemove = new Tag(tagName);
-
-            return new RemoveTagCommand(indexList, toRemove);
-        } catch (IllegalValueException ive) {
-            throw new ParseException(ive.getMessage(), ive);
-        }
-    }
-
-    /**
-     * Returns true if none of the prefixes contains empty {@code Optional} values in the given
-     * {@code ArgumentMultimap}.
-     */
-    private static boolean arePrefixesPresent(ArgumentMultimap argumentMultimap, Prefix... prefixes) {
-        return Stream.of(prefixes).allMatch(prefix -> argumentMultimap.getValue(prefix).isPresent());
-    }
-
-    /**
-     * Returns an ArrayList of the indexes in the given {@code String}.
-     *
-     */
-    private static ArrayList<Index> convertToArrayList(String indexes) throws IllegalValueException {
-        ArrayList<Index> indexList = new ArrayList<Index>();
-        String[] arrayOfIndexes = indexes.split(" ");
-        for (String s: arrayOfIndexes) {
-            indexList.add(ParserUtil.parseIndex(s));
-        }
-        return indexList;
-    }
-}
-```
-###### \java\seedu\address\logic\parser\UndoCommandParser.java
-``` java
-/**
- * Parses input arguments and creates a new UndoCommand object
- */
-public class UndoCommandParser implements Parser<UndoCommand> {
-    /**
-     * Parses the given {@code String} of arguments in the context of the seedu.address.logic.commands.UndoCommand
-     * and returns an seedu.address.logic.commands.UndoCommand object for execution.
-     * @throws ParseException if the user input does not conform the expected format
-     */
-    public UndoCommand parse(String args) throws ParseException {
-        try {
-            int numberOfCommands = Integer.parseInt(args.trim());
-            return new UndoCommand(numberOfCommands);
-        } catch (NumberFormatException ive) {
-            throw new ParseException(
-                    String.format(MESSAGE_INVALID_COMMAND_FORMAT, UndoCommand.MESSAGE_USAGE));
-        }
-    }
-}
-```
-###### \java\seedu\address\model\AddressBook.java
-``` java
-    /**
-     * Adds a person to the address book.
-     * Also checks the new person's tags and updates {@link #tags} with any new tags found,
-     * and updates the Tag objects in the person to point to those in {@link #tags}.
-     *
-     * @throws DuplicatePersonException if an equivalent person already exists.
-     */
-    public void addPerson(ReadOnlyPerson p) throws DuplicatePersonException {
-        Person newPerson = new Person(p);
-        try {
-            persons.add(newPerson);
-            syncMasterTagListWith(newPerson);
-        } catch (DuplicatePersonException e) {
-            throw new DuplicatePersonException();
-        }
-    }
-
-    /**
-     * Replaces the given person {@code target} in the list with {@code editedReadOnlyPerson}.
-     * {@code AddressBook}'s tag list will be updated with the tags of {@code editedReadOnlyPerson}.
-     *
-     * @throws DuplicatePersonException if updating the person's details causes the person to be equivalent to
-     *      another existing person in the list.
-     * @throws PersonNotFoundException if {@code target} could not be found in the list.
-     *
-     * @see #syncMasterTagListWith(Person)
-     */
-    public void updatePerson(ReadOnlyPerson target, ReadOnlyPerson editedReadOnlyPerson)
-            throws DuplicatePersonException, PersonNotFoundException {
-        requireNonNull(editedReadOnlyPerson);
-
-        Person editedPerson = new Person(editedReadOnlyPerson);
-        try {
-            persons.setPerson(target, editedPerson);
-            syncMasterTagListWith(editedPerson);
-        } catch (DuplicatePersonException e) {
-            throw new DuplicatePersonException();
-        } catch (PersonNotFoundException e) {
-            throw new PersonNotFoundException();
-        }
-
-    }
-
-```
-###### \java\seedu\address\model\AddressBook.java
-``` java
-    @Override
-    public String toString() {
-        return "Persons: " + getPersonList() + "\nTags: " + getTagList();
-    }
-
-```
-###### \java\seedu\address\model\Model.java
+###### /java/seedu/address/model/Model.java
 ``` java
     /** Deletes given tag from every of the given persons */
-    void removeTag(ArrayList<Index> targetIndexes, Tag toRemove) throws PersonNotFoundException,
+    void removeTag(ArrayList<Index> targetIndexes, Tag toRemove, String commandWord) throws PersonNotFoundException,
             DuplicatePersonException;
 
 ```
-###### \java\seedu\address\model\Model.java
+###### /java/seedu/address/model/Model.java
 ``` java
     /** Adds given tag to every of the given persons */
-    void addTag(ArrayList<Index> targetIndexes, Tag toAdd) throws PersonNotFoundException,
+    void addTag(ArrayList<Index> targetIndexes, Tag toAdd, String commandWord) throws PersonNotFoundException,
             DuplicatePersonException;
 
     /**
@@ -646,7 +32,7 @@ public class UndoCommandParser implements Parser<UndoCommand> {
     void updateFilteredPersonList(Predicate<ReadOnlyPerson> predicate);
 
 ```
-###### \java\seedu\address\model\Model.java
+###### /java/seedu/address/model/Model.java
 ``` java
     /**
      * Uses the JaroWinklerDistance function from the Apache Commons library to find the closest matching name when
@@ -656,7 +42,7 @@ public class UndoCommandParser implements Parser<UndoCommand> {
     public String getClosestMatchingName(NameContainsKeywordsPredicate predicate);
 
 ```
-###### \java\seedu\address\model\ModelManager.java
+###### /java/seedu/address/model/ModelManager.java
 ``` java
     /* JaroWinklerDistance method uses double values ranging from 0 to 1. Set initial value to match very similar
      * names only. Setting the value to any value less than or equal to 0 will match the first name in filteredPersons
@@ -664,20 +50,20 @@ public class UndoCommandParser implements Parser<UndoCommand> {
     private final double initialToleranceValue = 0.5;
 
 ```
-###### \java\seedu\address\model\ModelManager.java
+###### /java/seedu/address/model/ModelManager.java
 ``` java
     /**
      * Removes given tag from the given indexes of the target persons shown in the last person listing.
      */
     @Override
-    public synchronized void removeTag(ArrayList<Index> targetIndexes, Tag toRemove) throws PersonNotFoundException,
-            DuplicatePersonException {
+    public synchronized void removeTag(ArrayList<Index> targetIndexes, Tag toRemove, String commandWord)
+            throws PersonNotFoundException, DuplicatePersonException {
 
         for (Index index : targetIndexes) {
             int targetIndex = index.getZeroBased();
             ReadOnlyPerson oldPerson = this.getFilteredPersonList().get(targetIndex);
 
-            Person newPerson = setTagsForNewPerson(oldPerson, toRemove, false);
+            Person newPerson = setTagsForNewPerson(oldPerson, toRemove, commandWord);
 
             addressBook.updatePerson(oldPerson, newPerson);
             indicateAddressBookChanged();
@@ -688,14 +74,14 @@ public class UndoCommandParser implements Parser<UndoCommand> {
      * Adds given tag to the given indexes of the target persons shown in the last person listing.
      */
     @Override
-    public synchronized void addTag(ArrayList<Index> targetIndexes, Tag toAdd) throws PersonNotFoundException,
-            DuplicatePersonException {
+    public synchronized void addTag(ArrayList<Index> targetIndexes, Tag toAdd, String commandWord)
+            throws PersonNotFoundException, DuplicatePersonException {
 
         for (Index index : targetIndexes) {
             int targetIndex = index.getZeroBased();
             ReadOnlyPerson oldPerson = this.getFilteredPersonList().get(targetIndex);
 
-            Person newPerson = setTagsForNewPerson(oldPerson, toAdd, true);
+            Person newPerson = setTagsForNewPerson(oldPerson, toAdd, commandWord);
 
             addressBook.updatePerson(oldPerson, newPerson);
             indicateAddressBookChanged();
@@ -706,12 +92,14 @@ public class UndoCommandParser implements Parser<UndoCommand> {
      *  Returns a new person after checking if the  given tag is to be added or removed
      *  and setting the new tag for the person.
      */
-    private Person setTagsForNewPerson(ReadOnlyPerson oldPerson, Tag tagToAddOrRemove, boolean isAdd) {
+    private Person setTagsForNewPerson(ReadOnlyPerson oldPerson, Tag tagToAddOrRemove, String commandWord) {
         Person newPerson = new Person(oldPerson);
         Set<Tag> newTags = new HashSet<Tag>(newPerson.getTags());
-        if (isAdd) {
+        boolean isCommandAddTag = commandWord.equals(AddTagCommand.COMMAND_WORDVAR_1);
+        boolean isCommandRemoveTag = commandWord.equals(RemoveTagCommand.COMMAND_WORDVAR_1);
+        if (isCommandAddTag) {
             newTags.add(tagToAddOrRemove);
-        } else if (!isAdd) {
+        } else if (isCommandRemoveTag) {
             newTags.remove(tagToAddOrRemove);
         } else {
             assert false : "Tag should either be removed or added only.";
@@ -721,7 +109,7 @@ public class UndoCommandParser implements Parser<UndoCommand> {
     }
 
 ```
-###### \java\seedu\address\model\ModelManager.java
+###### /java/seedu/address/model/ModelManager.java
 ``` java
     /**
      * Returns the closest matching name(s) for given predicate. If no such name can be found,
@@ -783,20 +171,7 @@ public class UndoCommandParser implements Parser<UndoCommand> {
     }
 
 ```
-###### \java\seedu\address\model\person\NameContainsKeywordsPredicate.java
-``` java
-    public List<String> getKeywords() {
-        return this.keywords;
-    }
-
-    @Override
-    public String toString() {
-        String[] resultArray = new String[keywords.size()];
-        return String.join(" ", keywords.toArray(resultArray));
-    }
-}
-```
-###### \java\seedu\address\model\windowsize\WindowSize.java
+###### /java/seedu/address/model/windowsize/WindowSize.java
 ``` java
 /**
  * Represents the window size.
@@ -885,7 +260,675 @@ public final class WindowSize {
 
 }
 ```
-###### \java\seedu\address\storage\XmlSerializableAddressBook.java
+###### /java/seedu/address/model/AddressBook.java
+``` java
+    /**
+     * Adds a person to the address book.
+     * Also checks the new person's tags and updates {@link #tags} with any new tags found,
+     * and updates the Tag objects in the person to point to those in {@link #tags}.
+     *
+     * @throws DuplicatePersonException if an equivalent person already exists.
+     */
+    public void addPerson(ReadOnlyPerson p) throws DuplicatePersonException {
+        Person newPerson = new Person(p);
+        try {
+            persons.add(newPerson);
+            syncMasterTagListWith(newPerson);
+        } catch (DuplicatePersonException e) {
+            throw new DuplicatePersonException();
+        }
+    }
+
+    /**
+     * Replaces the given person {@code target} in the list with {@code editedReadOnlyPerson}.
+     * {@code AddressBook}'s tag list will be updated with the tags of {@code editedReadOnlyPerson}.
+     *
+     * @throws DuplicatePersonException if updating the person's details causes the person to be equivalent to
+     *      another existing person in the list.
+     * @throws PersonNotFoundException if {@code target} could not be found in the list.
+     *
+     * @see #syncMasterTagListWith(Person)
+     */
+    public void updatePerson(ReadOnlyPerson target, ReadOnlyPerson editedReadOnlyPerson)
+            throws DuplicatePersonException, PersonNotFoundException {
+        requireNonNull(editedReadOnlyPerson);
+
+        Person editedPerson = new Person(editedReadOnlyPerson);
+        try {
+            persons.setPerson(target, editedPerson);
+            syncMasterTagListWith(editedPerson);
+        } catch (DuplicatePersonException e) {
+            throw new DuplicatePersonException();
+        } catch (PersonNotFoundException e) {
+            throw new PersonNotFoundException();
+        }
+
+    }
+
+```
+###### /java/seedu/address/model/AddressBook.java
+``` java
+    @Override
+    public String toString() {
+        return "Persons: " + getPersonList() + "\nTags: " + getTagList();
+    }
+
+```
+###### /java/seedu/address/model/person/NameContainsKeywordsPredicate.java
+``` java
+    public List<String> getKeywords() {
+        return this.keywords;
+    }
+
+    @Override
+    public String toString() {
+        String[] resultArray = new String[keywords.size()];
+        return String.join(" ", keywords.toArray(resultArray));
+    }
+}
+```
+###### /java/seedu/address/logic/commands/UndoCommand.java
+``` java
+    public static final String MESSAGE_SOME_COMMANDS_UNDONE = "There were only %1$s commands to undo. "
+            + "Cannot undo %2$s more commands!";
+    public static final String MESSAGE_USAGE = COMMAND_WORDVAR_1
+            + " OR "
+            + COMMAND_WORDVAR_2
+            + " OR "
+            + COMMAND_WORDVAR_3
+            + ": Undo the number of commands identified by the given number. If "
+            + COMMAND_WORDVAR_1
+            + " OR "
+            + COMMAND_WORDVAR_2
+            + " is used, only the previous command will be undone. \n"
+            + "Parameters: NUMBER (must be a positive integer) if "
+            + COMMAND_WORDVAR_3
+            + " is used.\n"
+            + "Example 1: " + COMMAND_WORDVAR_1 + " \n"
+            + "Example 2: " + COMMAND_WORDVAR_3 + " 2";
+
+    private final int numberOfCommands;
+
+    public UndoCommand() {
+        this(1);
+    }
+
+    public UndoCommand(int numberOfCommands) {
+        this.numberOfCommands = numberOfCommands;
+    }
+
+    @Override
+    public CommandResult execute() throws CommandException {
+        requireAllNonNull(model, undoRedoStack);
+
+        if (numberOfCommands == 1) {
+            undoHandler(MESSAGE_FAILURE);
+            undoRedoStack.popUndo().undo();
+        } else if (numberOfCommands > 1) {
+            for (int i = 0; i < numberOfCommands; i++) {
+                int numberOfCommandsUndone = i;
+                int numberOfCommandsLeft = numberOfCommands - i;
+                undoHandler(String.format(MESSAGE_SOME_COMMANDS_UNDONE, numberOfCommandsUndone, numberOfCommandsLeft));
+                undoRedoStack.popUndo().undo();
+            }
+        } else {
+            assert false : "Number of commands must be at least 1";
+        }
+
+        return new CommandResult(MESSAGE_SUCCESS);
+    }
+
+    /**
+     * Handles the case where there is no command left to undo and outputs the corresponding message.
+     */
+    private void undoHandler(String message) throws CommandException {
+        if (!undoRedoStack.canUndo()) {
+            throw new CommandException(message);
+        }
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return other == this // short circuit if same object
+                || (other instanceof UndoCommand // instanceof handles nulls
+                && this.numberOfCommands == ((UndoCommand) other).numberOfCommands); // state check
+    }
+
+```
+###### /java/seedu/address/logic/commands/ChangeWindowSizeCommand.java
+``` java
+/**
+ * Changes the window windowSize according to predefined sizes that the user can choose from
+ */
+public class ChangeWindowSizeCommand extends Command {
+
+
+    public static final String COMMAND_WORD = "ws";
+    public static final String MESSAGE_USAGE = COMMAND_WORD
+            + ": Changes window size. Command is case insensitive. \n"
+            + "Parameters: WINDOWSIZE (Allowed sizes are small, med, big)\n"
+            + "Example 1: " + COMMAND_WORD + " small\n"
+            + "Example 2: " + COMMAND_WORD + " big";
+
+    public static final String MESSAGE_SUCCESS = "Window sized has been changed to: ";
+
+    private final String windowSize;
+
+    public ChangeWindowSizeCommand(String windowSize) {
+        this.windowSize = windowSize;
+    }
+
+    @Override
+    public CommandResult execute() throws CommandException {
+        if (WindowSize.isValidWindowSize(windowSize)) {
+            double newWindowWidth = WindowSize.getUserDefinedWindowWidth(windowSize);
+            double newWindowHeight = WindowSize.getUserDefinedWindowHeight(windowSize);
+            EventsCenter.getInstance().post(new ChangeWindowSizeRequestEvent(newWindowWidth, newWindowHeight));
+            return new CommandResult(MESSAGE_SUCCESS + newWindowWidth + " x " + newWindowHeight);
+        } else {
+            throw new CommandException(WindowSize.MESSAGE_WINDOW_SIZE_CONSTRAINTS);
+        }
+
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return other == this // short circuit if same object
+                || (other instanceof ChangeWindowSizeCommand // instanceof handles nulls
+                && windowSize.equals(((ChangeWindowSizeCommand) other).windowSize));
+
+    }
+}
+```
+###### /java/seedu/address/logic/commands/RedoCommand.java
+``` java
+    public static final String MESSAGE_SOME_COMMANDS_REDONE = "There were only %1$s commands to redo. "
+            + "Cannot redo %2$s more commands!";
+    public static final String MESSAGE_USAGE = COMMAND_WORDVAR_1
+            + " OR "
+            + COMMAND_WORDVAR_2
+            + " OR "
+            + COMMAND_WORDVAR_3
+            + ": Redo the number of commands identified by the given number. If "
+            + COMMAND_WORDVAR_1
+            + " OR "
+            + COMMAND_WORDVAR_2
+            + " is used, only the previous command will be redone. \n"
+            + "Parameters: NUMBER (must be a positive integer) if "
+            + COMMAND_WORDVAR_3
+            + " is used.\n"
+            + "Example 1: " + COMMAND_WORDVAR_1 + " \n"
+            + "Example 2: " + COMMAND_WORDVAR_3 + " 3";
+
+    private final int numberOfCommands;
+
+    public RedoCommand() {
+        this(1);
+    }
+
+    public RedoCommand(int numberOfCommands) {
+        this.numberOfCommands = numberOfCommands;
+    }
+
+    @Override
+    public CommandResult execute() throws CommandException {
+        requireAllNonNull(model, undoRedoStack);
+
+        if (numberOfCommands == 1) {
+            redoHandler(MESSAGE_FAILURE);
+            undoRedoStack.popRedo().redo();
+        } else if (numberOfCommands > 1) {
+            for (int i = 0; i < numberOfCommands; i++) {
+                int numberOfCommandsUndone = i;
+                int numberOfCommandsLeft = numberOfCommands - i;
+                redoHandler(String.format(MESSAGE_SOME_COMMANDS_REDONE, numberOfCommandsUndone, numberOfCommandsLeft));
+                undoRedoStack.popRedo().redo();
+            }
+        } else {
+            assert false : "Number of commands must be at least 1";
+        }
+
+        return new CommandResult(MESSAGE_SUCCESS);
+    }
+
+    /**
+     * Handles the case where there is no command left to redo and outputs the corresponding message.
+     */
+    private void redoHandler(String message) throws CommandException {
+        if (!undoRedoStack.canRedo()) {
+            throw new CommandException(message);
+        }
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return other == this // short circuit if same object
+                || (other instanceof RedoCommand // instanceof handles nulls
+                && this.numberOfCommands == ((RedoCommand) other).numberOfCommands); // state check
+    }
+
+```
+###### /java/seedu/address/logic/commands/RemoveTagCommand.java
+``` java
+/**
+ * Removes a tag from identified persons using the last displayed indexes from the address book.
+ */
+public class RemoveTagCommand extends UndoableCommand {
+
+    public static final String COMMAND_WORDVAR_1 = "removetag";
+    public static final String COMMAND_WORDVAR_2 = "rt";
+
+    public static final String MESSAGE_USAGE = COMMAND_WORDVAR_1
+            + " OR "
+            + COMMAND_WORDVAR_2
+            + ": Removes the given tag from identified person by the list of index numbers used in the last person "
+            + "listing."
+            + " Command is case-sensitive. \n"
+            + "Parameters: "
+            + "[INDEX] [MORE INDEXES] (every index must be a positive integer) "
+            + "[" + PREFIX_TAG + "TAG]...\n"
+            + "Example 1: " + COMMAND_WORDVAR_1 + " 1 2 3 t/friends \n"
+            + "Example 2: " + COMMAND_WORDVAR_2.toUpperCase() + " 2 5 t/classmate \n";
+
+    public static final String MESSAGE_REMOVE_TAG_SUCCESS = "Removed Tag: %1$s";
+    public static final String MESSAGE_DUPLICATE_PERSON = "This person already exists in the address book.";
+    public static final String MESSAGE_NO_SUCH_TAG = "This tag does not exist in any of the given persons.";
+
+    private final ArrayList<Index> targetIndexes;
+    private final Tag tagToRemove;
+
+    /**
+     * @param targetIndexes of the persons in the filtered person list to edit
+     * @param tagToRemove tag to remove from given target indexes
+     */
+    public RemoveTagCommand(ArrayList<Index> targetIndexes, Tag tagToRemove) {
+
+        requireNonNull(targetIndexes);
+        requireNonNull(tagToRemove);
+
+        this.targetIndexes = targetIndexes;
+        this.tagToRemove = tagToRemove;
+    }
+
+    /**
+     * Removes tag to remove from each target person that has the given tag.
+     */
+    @Override
+    public CommandResult executeUndoableCommand() throws CommandException {
+
+        List<ReadOnlyPerson> lastShownList = model.getFilteredPersonList();
+
+        targetIndexesOutOfBoundsChecker(lastShownList);
+        tagInTargetIndexesChecker(lastShownList);
+
+        try {
+            model.removeTag(this.targetIndexes, this.tagToRemove, COMMAND_WORDVAR_1);
+        } catch (DuplicatePersonException dpe) {
+            throw new CommandException(MESSAGE_DUPLICATE_PERSON);
+        } catch (PersonNotFoundException pnfe) {
+            throw new AssertionError("The target person cannot be missing");
+        }
+
+        return new CommandResult(String.format(MESSAGE_REMOVE_TAG_SUCCESS, tagToRemove));
+    }
+
+    /**
+     * Checks if all target indexes are not out of bounds.
+     */
+    private void targetIndexesOutOfBoundsChecker(List<ReadOnlyPerson> lastShownList) throws CommandException {
+        for (Index index : targetIndexes) {
+            if (index.getZeroBased() >= lastShownList.size()) {
+                throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+            }
+        }
+    }
+
+    /**
+     * Checks if the tag exists among the given target indexes.
+     */
+    private void tagInTargetIndexesChecker(List<ReadOnlyPerson> lastShownList) throws CommandException {
+        for (Index index : targetIndexes) {
+            int targetIndex = index.getZeroBased();
+            ReadOnlyPerson readOnlyPerson = lastShownList.get(targetIndex);
+            if (readOnlyPerson.getTags().contains(tagToRemove)) {
+                return;
+            }
+        }
+        throw new CommandException(MESSAGE_NO_SUCH_TAG);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        // short circuit if same object
+        if (other == this) {
+            return true;
+        }
+
+        // instanceof handles nulls
+        if (!(other instanceof RemoveTagCommand)) {
+            return false;
+        }
+
+        // state check
+        RemoveTagCommand e = (RemoveTagCommand) other;
+        return targetIndexes.equals(e.targetIndexes)
+                && tagToRemove.equals(e.tagToRemove);
+    }
+}
+```
+###### /java/seedu/address/logic/commands/FindCommand.java
+``` java
+    @Override
+    public CommandResult execute() {
+        model.updateFilteredPersonList(predicate);
+        int numberOfPersonsShown = model.getFilteredPersonList().size();
+        boolean isPersonsNotFoundForGivenKeyword = numberOfPersonsShown == 0 && !predicate.getKeywords().isEmpty();
+
+        if (isPersonsNotFoundForGivenKeyword) {
+            String targets = model.getClosestMatchingName(predicate);
+            List<String> targetsAsList = Arrays.asList(targets.split("\\s+"));
+
+            if (targetsAsList.equals(predicate.getKeywords())) {
+                model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
+                return new CommandResult(String.format(Messages.MESSAGE_NO_MATCHING_NAME_FOUND, predicate));
+            }
+
+            model.updateFilteredPersonList(new NameContainsKeywordsPredicate(targetsAsList));
+            return new CommandResult(String.format(Messages.MESSAGE_NO_PERSON_FOUND, predicate,
+                    String.join(", ", targetsAsList)));
+        }
+        EventsCenter.getInstance().post(new PopulateBirthdayEvent(model.getFilteredPersonList()));
+        return new CommandResult(getMessageForPersonListShownSummary(numberOfPersonsShown));
+    }
+
+```
+###### /java/seedu/address/logic/commands/AddTagCommand.java
+``` java
+/**
+ * Adds a tag to the identified persons using the last displayed indexes from the address book.
+ */
+public class AddTagCommand extends UndoableCommand {
+
+    public static final String COMMAND_WORDVAR_1 = "addtag";
+    public static final String COMMAND_WORDVAR_2 = "at";
+
+    public static final String MESSAGE_USAGE = COMMAND_WORDVAR_1
+            + " OR "
+            + COMMAND_WORDVAR_2
+            + ": Adds the given tag to the persons identified by the list of index numbers used in the last person "
+            + "listing."
+            + " Command is case-sensitive. \n"
+            + "Parameters: "
+            + "[INDEX] [MORE INDEXES] (every index must be a positive integer) "
+            + "[" + PREFIX_TAG + "TAG]...\n"
+            + "Example 1: " + COMMAND_WORDVAR_1 + " 1 2 3 t/friends \n"
+            + "Example 2: " + COMMAND_WORDVAR_2.toUpperCase() + " 2 5 t/classmate \n";
+
+    public static final String MESSAGE_ADD_TAG_SUCCESS = "Added Tag: %1$s";
+    public static final String MESSAGE_DUPLICATE_PERSON = "This person already exists in the address book.";
+    public static final String MESSAGE_DUPLICATE_TAG = "This tag already exists in all of the given persons.";
+
+    private final ArrayList<Index> targetIndexes;
+    private final Tag tagToAdd;
+
+    /**
+     * @param targetIndexes of the persons in the filtered person list to edit
+     * @param tagToAdd tag to add to given target indexes
+     */
+    public AddTagCommand(ArrayList<Index> targetIndexes, Tag tagToAdd) {
+
+        requireNonNull(targetIndexes);
+        requireNonNull(tagToAdd);
+
+        this.targetIndexes = targetIndexes;
+        this.tagToAdd = tagToAdd;
+    }
+
+    /**
+     * Adds the tag to add to each target person that doesn't have the given tag.
+     */
+    @Override
+    public CommandResult executeUndoableCommand() throws CommandException {
+
+        List<ReadOnlyPerson> lastShownList = model.getFilteredPersonList();
+
+        targetIndexesOutOfBoundsChecker(lastShownList);
+        tagInAllTargetIndexesChecker(lastShownList);
+
+        try {
+            model.addTag(this.targetIndexes, this.tagToAdd, COMMAND_WORDVAR_1);
+        } catch (DuplicatePersonException dpe) {
+            throw new CommandException(MESSAGE_DUPLICATE_PERSON);
+        } catch (PersonNotFoundException pnfe) {
+            throw new AssertionError("The target person cannot be missing");
+        }
+
+        return new CommandResult(String.format(MESSAGE_ADD_TAG_SUCCESS, tagToAdd));
+    }
+
+    /**
+     * Checks if all target indexes are not out of bounds.
+     */
+    private void targetIndexesOutOfBoundsChecker(List<ReadOnlyPerson> lastShownList) throws CommandException {
+        for (Index index : targetIndexes) {
+            if (index.getZeroBased() >= lastShownList.size()) {
+                throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+            }
+        }
+    }
+
+    /**
+     * Checks if the tag exists in all of the given target indexes.
+     */
+    private void tagInAllTargetIndexesChecker(List<ReadOnlyPerson> lastShownList) throws CommandException {
+        for (Index index : targetIndexes) {
+            int targetIndex = index.getZeroBased();
+            ReadOnlyPerson readOnlyPerson = lastShownList.get(targetIndex);
+            if (!readOnlyPerson.getTags().contains(tagToAdd)) {
+                return;
+            }
+        }
+        throw new CommandException(MESSAGE_DUPLICATE_TAG);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        // short circuit if same object
+        if (other == this) {
+            return true;
+        }
+
+        // instanceof handles nulls
+        if (!(other instanceof AddTagCommand)) {
+            return false;
+        }
+
+        // state check
+        AddTagCommand e = (AddTagCommand) other;
+        return targetIndexes.equals(e.targetIndexes)
+                && tagToAdd.equals(e.tagToAdd);
+    }
+}
+```
+###### /java/seedu/address/logic/parser/ChangeWindowSizeCommandParser.java
+``` java
+/**
+ * Parses input arguments and creates a new ChangeWindowSizeCommand object
+ */
+public class ChangeWindowSizeCommandParser implements Parser<ChangeWindowSizeCommand> {
+
+    /**
+     * Parses the given {@code String} of arguments in the context of the ChangeWindowSizeCommand
+     * and returns an ChangeWindowSizeCommand object for execution.
+     * @throws ParseException if the user input does not conform the expected format
+     */
+    public ChangeWindowSizeCommand parse(String args) throws ParseException {
+        String trimmedArgs = args.trim();
+        if (!WindowSize.isValidWindowSize(trimmedArgs)) {
+            throw new ParseException(
+                    String.format(MESSAGE_INVALID_COMMAND_FORMAT, ChangeWindowSizeCommand.MESSAGE_USAGE));
+        }
+
+        return new ChangeWindowSizeCommand(args.trim());
+    }
+}
+```
+###### /java/seedu/address/logic/parser/RemoveTagCommandParser.java
+``` java
+/**
+ * Parses input arguments and creates a new RemoveTagCommand object
+ */
+public class RemoveTagCommandParser implements Parser<RemoveTagCommand> {
+    /**
+     * Parses the given {@code String} of arguments in the context of the RemoveTagCommand
+     * and returns a RemoveTagCommand object for execution.
+     * @throws ParseException if the user input does not conform the expected format
+     */
+    public RemoveTagCommand parse(String args) throws ParseException {
+        requireNonNull(args);
+        ArgumentMultimap argMultimap =
+                ArgumentTokenizer.tokenize(args, PREFIX_TAG);
+
+        if (!arePrefixesPresent(argMultimap, PREFIX_TAG)) {
+            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, RemoveTagCommand.MESSAGE_USAGE));
+        }
+
+        try {
+            String indexes = argMultimap.getPreamble();
+            ArrayList<Index> indexList = convertToArrayList(indexes);
+
+            String tagName = argMultimap.getValue(PREFIX_TAG).orElse("");
+            Tag toRemove = new Tag(tagName);
+
+            return new RemoveTagCommand(indexList, toRemove);
+        } catch (IllegalValueException ive) {
+            throw new ParseException(ive.getMessage(), ive);
+        }
+    }
+
+    /**
+     * Returns true if none of the prefixes contains empty {@code Optional} values in the given
+     * {@code ArgumentMultimap}.
+     */
+    private static boolean arePrefixesPresent(ArgumentMultimap argumentMultimap, Prefix... prefixes) {
+        return Stream.of(prefixes).allMatch(prefix -> argumentMultimap.getValue(prefix).isPresent());
+    }
+
+    /**
+     * Returns an ArrayList of the indexes in the given {@code String}.
+     *
+     */
+    private static ArrayList<Index> convertToArrayList(String indexes) throws IllegalValueException {
+        ArrayList<Index> indexList = new ArrayList<Index>();
+        String[] arrayOfIndexes = indexes.split(" ");
+        for (String s: arrayOfIndexes) {
+            indexList.add(ParserUtil.parseIndex(s));
+        }
+        return indexList;
+    }
+}
+```
+###### /java/seedu/address/logic/parser/UndoCommandParser.java
+``` java
+/**
+ * Parses input arguments and creates a new UndoCommand object
+ */
+public class UndoCommandParser implements Parser<UndoCommand> {
+    /**
+     * Parses the given {@code String} of arguments in the context of the seedu.address.logic.commands.UndoCommand
+     * and returns an seedu.address.logic.commands.UndoCommand object for execution.
+     * @throws ParseException if the user input does not conform the expected format
+     */
+    public UndoCommand parse(String args) throws ParseException {
+        try {
+            int numberOfCommands = Integer.parseInt(args.trim());
+            return new UndoCommand(numberOfCommands);
+        } catch (NumberFormatException ive) {
+            throw new ParseException(
+                    String.format(MESSAGE_INVALID_COMMAND_FORMAT, UndoCommand.MESSAGE_USAGE));
+        }
+    }
+}
+```
+###### /java/seedu/address/logic/parser/AddTagCommandParser.java
+``` java
+/**
+ * Parses input arguments and creates a new AddTagCommand object
+ */
+public class AddTagCommandParser implements Parser<AddTagCommand> {
+    /**
+     * Parses the given {@code String} of arguments in the context of the AddTagCommand
+     * and returns a AddTagCommand object for execution.
+     * @throws ParseException if the user input does not conform the expected format
+     */
+    public AddTagCommand parse(String args) throws ParseException {
+        requireNonNull(args);
+        ArgumentMultimap argMultimap =
+                ArgumentTokenizer.tokenize(args, PREFIX_TAG);
+
+        if (!arePrefixesPresent(argMultimap, PREFIX_TAG)) {
+            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddTagCommand.MESSAGE_USAGE));
+        }
+
+        try {
+            String indexes = argMultimap.getPreamble();
+            ArrayList<Index> indexList = convertToArrayList(indexes);
+
+            String tagName = argMultimap.getValue(PREFIX_TAG).orElse("");
+            Tag toAdd = new Tag(tagName);
+
+            return new AddTagCommand(indexList, toAdd);
+        } catch (IllegalValueException ive) {
+            throw new ParseException(ive.getMessage(), ive);
+        }
+    }
+
+    /**
+     * Returns true if none of the prefixes contains empty {@code Optional} values in the given
+     * {@code ArgumentMultimap}.
+     */
+    private static boolean arePrefixesPresent(ArgumentMultimap argumentMultimap, Prefix... prefixes) {
+        return Stream.of(prefixes).allMatch(prefix -> argumentMultimap.getValue(prefix).isPresent());
+    }
+
+    /**
+     * Returns an ArrayList of the indexes in the given {@code String}.
+     *
+     */
+    private static ArrayList<Index> convertToArrayList(String indexes) throws IllegalValueException {
+        ArrayList<Index> indexList = new ArrayList<Index>();
+        String[] arrayOfIndexes = indexes.split(" ");
+        for (String s: arrayOfIndexes) {
+            indexList.add(ParserUtil.parseIndex(s));
+        }
+        return indexList;
+    }
+}
+```
+###### /java/seedu/address/logic/parser/RedoCommandParser.java
+``` java
+/**
+ * Parses input arguments and creates a new RedoCommand object
+ */
+
+public class RedoCommandParser implements Parser<RedoCommand> {
+    /**
+     * Parses the given {@code String} of arguments in the context of the seedu.address.logic.commands.RedoCommand
+     * and returns an seedu.address.logic.commands.RedoCommand object for execution.
+     * @throws ParseException if the user input does not conform the expected format
+     */
+    public RedoCommand parse(String args) throws ParseException {
+        try {
+            int numberOfCommands = Integer.parseInt(args.trim());
+            return new RedoCommand(numberOfCommands);
+        } catch (NumberFormatException ive) {
+            throw new ParseException(
+                    String.format(MESSAGE_INVALID_COMMAND_FORMAT, RedoCommand.MESSAGE_USAGE));
+        }
+    }
+}
+```
+###### /java/seedu/address/storage/XmlSerializableAddressBook.java
 ``` java
     @Override
     public ObservableList<ReadOnlyPerson> getPersonList() {
@@ -917,7 +960,36 @@ public final class WindowSize {
 
 }
 ```
-###### \java\seedu\address\ui\MainWindow.java
+###### /java/seedu/address/commons/events/ui/ChangeWindowSizeRequestEvent.java
+``` java
+/**
+ * Indicates a request for a change in window size.
+ */
+public class ChangeWindowSizeRequestEvent extends BaseEvent {
+
+    private double windowWidth;
+    private double windowHeight;
+
+    public ChangeWindowSizeRequestEvent(double windowWidth, double windowHeight) {
+        this.windowWidth = windowWidth;
+        this.windowHeight = windowHeight;
+    }
+
+    public double getWindowWidth() {
+        return windowWidth;
+    }
+
+    public double getWindowHeight() {
+        return windowHeight;
+    }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName();
+    }
+}
+```
+###### /java/seedu/address/ui/MainWindow.java
 ``` java
     /**
      * Sets the window size to the user defined size.
@@ -928,7 +1000,7 @@ public final class WindowSize {
     }
 
 ```
-###### \java\seedu\address\ui\MainWindow.java
+###### /java/seedu/address/ui/MainWindow.java
 ``` java
     /**
      * Changes window size to small.
@@ -967,14 +1039,7 @@ public final class WindowSize {
     }
 
 ```
-###### \resources\view\DarkTheme.css
-``` css
-#personListView {
-    -fx-background-color: #383838;
-}
-
-```
-###### \resources\view\MainWindow.fxml
+###### /resources/view/MainWindow.fxml
 ``` fxml
       <Menu mnemonicParsing="false" text="Window">
         <items>
@@ -984,4 +1049,11 @@ public final class WindowSize {
         </items>
       </Menu>
   </MenuBar>
+```
+###### /resources/view/DarkTheme.css
+``` css
+#personListView {
+    -fx-background-color: #383838;
+}
+
 ```
