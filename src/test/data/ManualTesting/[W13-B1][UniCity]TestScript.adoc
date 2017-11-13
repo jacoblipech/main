@@ -2,7 +2,6 @@
 :sectnums:
 
 
-
 == Introduction
 This document explains how to perform manual testing on UniCity. It shows the command to type and the expected result.
 Deatils on how to load the sample data is included as well.
@@ -84,6 +83,53 @@ Expected result: No matching name found for 123. Showing all contacts instead.
 +
 All contacts will be displayed.
 
+=== Filter command
+
+Command usage: `filter TAG [MORE_TAGS]...`
+Since this test relies on filtering tags, the expected results may differ if addtag/removetag tests is done before this tests.
+
+* `filter colleagues` +
+Expected result: 3 persons listed!
++
+The person panel list will display three persons that have `colleagues` tag.
+
+* `filter friends` +
+Expected result: 5 persons listed!
++
+The person panel list will display five persons that have `friends` tag.
+
+* `filter friends colleagues` +
+Expected result: 8 persons listed!
++
+The person panel list will display eight persons that have either the `colleagues` or `friends` tag, or both.
+
+* `filter professors boss` +
+Expected result: 3 persons listed!
++
+The person panel list will display three persons that have either the `professors` or `boss` tag, or both.
+
+* `filter girlfriend` +
+Expected result: 0 persons listed!
++
+Since no contacts have been tagged as `girlfriend`, no tags will match the filter criteria, hence zero persons displayed.
+
+* `filter friend` +
+Expected result: 0 persons listed!
++
+Since the filter criteria is word specific, the `friend` filter criteria will not match with the `friends` tag, hence zero persons displayed.
+
+* `filter PROFESSORS` +
+Expected result: 0 persons listed!
++
+Since the filter criteria is case sensitive, the `PROFESSORS` filter criteria will not match with the `professors` tag, hence zero persons displayed.
+
+* `filter` +
+Expected result: +
+Invalid command format!
+filter: Filters all persons whose tags contain any of the specified keywords (case-sensitive) and displays them as a list with index numbers. Command is case-insensitive.
+Parameters: KEYWORD [MORE_KEYWORDS]...
++
+The command is missing parameters which results in an incorrect format.
 
 === Add tags command
 
@@ -367,6 +413,44 @@ Expected result: The person index provided is invalid
 +
 [NOTE]
 This result will be displayed if and only if there are fewer than 99999 contacts in UniCity.
+
+=== Add command with duplicate fields
+
+* `add n/Yong Dian Nao p/98234567 e/dn_yong@yahoo.com.sg` +
+Expected result: This person's name is already in use.Would you like to continue? YES or NO?
++
+A contact in the contact list already has the name `Yong Dian Nao`. The add function detects this and prompts the user if he/she wants to continue.
+
+* (following the above add command) `yes` +
+Expected result: New person added: Yong Dian Nao Phone: 98234567 Email: dn_yong@yahoo.com.sg Address: No Address Added Favourite: False Birthday: No Birthday Added Tags:
++
+User decides to continue with the add command with the knowledge that there is already an existing contact sharing the same name. The add command is executed and this contact appears as the last contact in the list.
+
+* `add n/ong lye p/92384562 e/ol_lye@gmail.com` +
+Expected result: This person's name, phone is already in use.Would you like to continue? YES or NO?
++
+A contact in the contact list already has the name `Ong Lye` and phone number `92384562`(Mei Li Mao's phone number).
+The check for duplicate fields is case-insensitive. UniCity searches for duplicate fields in the sequence of the current listing.
+It detects a duplicate name first, then the duplicate phone number as the person with the duplicate name appears first, before the person with the duplicate phone number, in the contact listing.
+The add function detects this and prompts the user if he/she wants to continue.
+
+* (following the above add command) `no` +
+Expected result: Command not executed.
++
+User decides to discontinue the add command. The command is terminated and the contact will not be added to the contact list.
+
+* `add n/bernice yu p/93415783 e/royb@hotmail.com` +
+Expected result: This person's email, phone, name is already in use.Would you like to continue? YES or NO?
++
+A contact in the contact list already has the name `Bernice Yu` and phone number `93415783`(Courtney Prince's phone number) and email `royb@hotmail.com` (Roy Banner).
+The check for duplicate fields is case-insensitive. UniCity searches for duplicate fields in the sequence of the current listing.
+It detects a duplicate email first, then the duplicate phone number and lastly the duplicate name according to the sequence of `Roy Banner`, `Courtney Prince` and `Bernice Yu`
+The add function detects this and prompts the user if he/she wants to continue.
+
+* (following the above add command) `add n/Lee Tien Jin p/98234764 e/teejay@hotmail.com` +
+Expected result: New person added: Lee Tien Jin Phone: 98234764 Email: teejay@hotmail.com Address: No Address Added Favourite: False Birthday: No Birthday Added Tags:
++
+A new command has been crafted and the previous add command has been ignored and terminated. This new add command detects no duplicates, hence the add command proceeds as normal and adds the contact into UniCity's contact list.
 
 === Exit
 

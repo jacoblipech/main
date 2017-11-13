@@ -145,11 +145,47 @@
         <birthday>19/02/1999</birthday>
         <tagged>friends</tagged>
     </persons>
+    <persons>
+        <name>Ong Lye</name>
+        <phone>96423745</phone>
+        <email>ong_lye@gmail.com</email>
+        <address>54 Jln Mas Kuning, #03-19</address>
+        <favourite>False</favourite>
+        <birthday>06/07/1993</birthday>
+        <tagged>hallmates</tagged>
+    </persons>
+    <persons>
+        <name>Aloycious Jin</name>
+        <phone>98886235</phone>
+        <email>aloyjin@gmail.com</email>
+        <address>Blk 23 East Coast Road, #04-02</address>
+        <favourite>True</favourite>
+        <birthday>12/04/1992</birthday>
+        <tagged>friends</tagged>
+    </persons>
+    <persons>
+        <name>Mei Li Mao</name>
+        <phone>92384562</phone>
+        <email>mei_lm@yahoo.com.sg</email>
+        <address>Blk 81 Bedok Avenue 3, #08-11</address>
+        <favourite>False</favourite>
+        <birthday>28/06/1993</birthday>
+        <tagged>classmates</tagged>
+    </persons>
+    <persons>
+        <name>Yong Dian Nao</name>
+        <phone>98347652</phone>
+        <email>yongdiannao@u.nus.edu</email>
+        <address>13 Computing Drive</address>
+        <favourite>False</favourite>
+        <birthday>23/07/1992</birthday>
+    </persons>
     <tags>colleagues</tags>
     <tags>classmates</tags>
     <tags>neighbours</tags>
     <tags>family</tags>
     <tags>friends</tags>
+    <tags>hallmates</tags>
     <tags>boss</tags>
     <tags>professors</tags>
 </addressbook>

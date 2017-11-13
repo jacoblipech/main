@@ -95,7 +95,7 @@ Format: +
 
 Filters contacts whose tags contain any of the given keywords. +
 Format: +
-`filter KEYWORD [MORE_KEYWORDS]`
+`filter TAG [MORE_TAGS]`
 
 ****
 * The searched tags are case sensitive. e.g `Professor` will not match `professor`
