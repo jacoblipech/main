@@ -94,12 +94,12 @@ Expected result: 3 persons listed!
 The person panel list will display three persons that have `colleagues` tag.
 
 * `filter friends` +
-Expected result: 5 persons listed!
+Expected result: 9 persons listed!
 +
 The person panel list will display five persons that have `friends` tag.
 
 * `filter friends colleagues` +
-Expected result: 8 persons listed!
+Expected result: 11 persons listed!
 +
 The person panel list will display eight persons that have either the `colleagues` or `friends` tag, or both.
 
