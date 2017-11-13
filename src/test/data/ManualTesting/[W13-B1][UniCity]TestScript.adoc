@@ -50,6 +50,11 @@ Expected result: No results for alx. Showing results for Alex instead.
 +
 `Alex Yeoh` will be displayed.
 
+* `find char alex` +
+Expected result: 1 persons listed!.
++
+`Alex Yeoh` will be displayed since alex matches a person in the list.
+
 * `find alx char` +
 Expected result: No results for alx char. Showing results for Alex, Charlotte instead.
 +
@@ -61,8 +66,9 @@ Expected result: No results for asdkh. Showing results for Kathy instead.
 `Kathy Forest` will be displayed.
 
 [NOTE]
-The suggestion of the closest matching name is just a prediction.If the given name is ambiguous,
-it will return closest mtaching name even though no such name can can be found for such an ambiguous input.
+The suggestion of the closest matching name is just a prediction. If the given input is ambiguous,
+it will return closest matching name even though no such name can be matched for such an ambiguous input. +
+Example: `ye` will return Alex but `yeo` will return Yeoh as the closest matching name.
 
 * `find` +
 Expected result:
