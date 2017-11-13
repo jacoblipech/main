@@ -56,6 +56,96 @@
         <tagged>friends</tagged>
     </persons>
     <persons>
+        <name>Bill Gates</name>
+        <phone>88888888</phone>
+        <email>therealbillgates@hotmail.com</email>
+        <address>No Address Added</address>
+        <favourite>False</favourite>
+        <birthday>No Birthday Added</birthday>
+        <tagged>boss</tagged>
+    </persons>
+    <persons>
+        <name>McDonald Trump</name>
+        <phone>99998888</phone>
+        <email>prestrump@gamil.com</email>
+        <address>No Address Added</address>
+        <favourite>True</favourite>
+        <birthday>No Birthday Added</birthday>
+        <tagged>friends</tagged>
+    </persons>
+    <persons>
+        <name>Thomas Cormen</name>
+        <phone>80327643</phone>
+        <email>thomascormen@gmail.com</email>
+        <address>MIT</address>
+        <favourite>True</favourite>
+        <birthday>01/01/1956</birthday>
+        <tagged>professors</tagged>
+    </persons>
+    <persons>
+        <name>Alan Turing</name>
+        <phone>97324518</phone>
+        <email>alanturing@gmail.com</email>
+        <address>6 College Avenue East, #20-01</address>
+        <favourite>True</favourite>
+        <birthday>23/06/1912</birthday>
+        <tagged>professors</tagged>
+    </persons>
+    <persons>
+        <name>Tim Jobs</name>
+        <phone>92534954</phone>
+        <email>imnotstevejobs@gmail.com</email>
+        <address>1 Infinite Loop, #01-01</address>
+        <favourite>True</favourite>
+        <birthday>28/02/1974</birthday>
+        <tagged>colleagues</tagged>
+    </persons>
+    <persons>
+        <name>Brandon Tan</name>
+        <phone>82342873</phone>
+        <email>brandontan@hotmail.com</email>
+        <address>No Address Added</address>
+        <favourite>False</favourite>
+        <birthday>No Birthday Added</birthday>
+        <tagged>friends</tagged>
+    </persons>
+    <persons>
+        <name>Aston Lee</name>
+        <phone>92367888</phone>
+        <email>aston.lee@gamil.com</email>
+        <address>No Address Added</address>
+        <favourite>False</favourite>
+        <birthday>No Birthday Added</birthday>
+        <tagged>friends</tagged>
+    </persons>
+    <persons>
+        <name>Mike Tan</name>
+        <phone>81237993</phone>
+        <email>miketan@gmail.com</email>
+        <address>NUS</address>
+        <favourite>False</favourite>
+        <birthday>05/01/1995</birthday>
+        <tagged>friends</tagged>
+    </persons>
+    <persons>
+        <name>Jacob Lee</name>
+        <phone>94438279</phone>
+        <email>alanturing@gmail.com</email>
+        <address>6 College Avenue East, #13-03</address>
+        <favourite>False</favourite>
+        <birthday>28/06/1997</birthday>
+        <tagged>friends</tagged>
+    </persons>
+    <persons>
+        <name>Shinzo Abbot</name>
+        <phone>86486819</phone>
+        <email>shinzo@gmail.com</email>
+        <address>2 College Avenue West, #01-01</address>
+        <favourite>False</favourite>
+        <birthday>19/02/1999</birthday>
+        <tagged>friends</tagged>
+    </persons>
+    <persons>
         <name>Ong Lye</name>
         <phone>96423745</phone>
         <email>ong_lye@gmail.com</email>
@@ -89,7 +179,6 @@
         <address>13 Computing Drive</address>
         <favourite>False</favourite>
         <birthday>23/07/1992</birthday>
-        <tagged>friends</tagged>
     </persons>
     <tags>colleagues</tags>
     <tags>classmates</tags>
@@ -97,4 +186,6 @@
     <tags>family</tags>
     <tags>friends</tags>
     <tags>hallmates</tags>
+    <tags>boss</tags>
+    <tags>professors</tags>
 </addressbook>

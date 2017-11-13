@@ -7,13 +7,13 @@ https://ci.appveyor.com/project/taojiashu/main/branch/master[image:https://ci.ap
 https://coveralls.io/github/CS2103AUG2017-W13-B1/main?branch=master[image:https://coveralls.io/repos/github/CS2103AUG2017-W13-B1/main/badge.svg?branch=master[Coverage Status]]
 image:https://api.codacy.com/project/badge/Grade/9b5af045af0c4d3b86806c2a3293216a["Codacy code quality", link="https://www.codacy.com/app/taojiashu/main?utm_source=github.com&utm_medium=referral&utm_content=CS2103AUG2017-W13-B1/main&utm_campaign=Badge_Grade"]
 
-//ifndef::env-github[]
-image::docs/images/UniCity.png[width="600"]
-//endif::[]
-
-//ifdef::env-github[]
+ifdef::env-github[]
 image::docs/images/Ui.png[width="600"]
-//endif::[]
+endif::[]
+
+ifndef::env-github[]
+image::images/Ui.png[width="600"]
+endif::[]
 
 * This is a desktop Address Book application. It has a GUI but most of the user interactions happen using a CLI (Command Line Interface).
 * It is a product targeting university students, who can use it to manage their connections and network in their courses of study in the univeristy.
