@@ -26,7 +26,7 @@ A common mistake is renaming the file name as `addressbook.xml`, making the enti
 The manual testing done below is based on the `[W13-B1][UniCity]SampleData.xml` file from IVLE. Please load that into
 UniCity before starting the test.
 
-=== Find command
+=== Suggestion feature for find command
 
 Command usage: `find KEYWORD [MORE_KEYWORDS]`
 
