@@ -100,6 +100,51 @@
         <birthday>28/02/1974</birthday>
         <tagged>colleagues</tagged>
     </persons>
+    <persons>
+        <name>Brandon Tan</name>
+        <phone>82342873</phone>
+        <email>brandontan@hotmail.com</email>
+        <address>No Address Added</address>
+        <favourite>False</favourite>
+        <birthday>No Birthday Added</birthday>
+        <tagged>friends</tagged>
+    </persons>
+    <persons>
+        <name>Aston Lee</name>
+        <phone>92367888</phone>
+        <email>aston.lee@gamil.com</email>
+        <address>No Address Added</address>
+        <favourite>False</favourite>
+        <birthday>No Birthday Added</birthday>
+        <tagged>friends</tagged>
+    </persons>
+    <persons>
+        <name>Mike Tan</name>
+        <phone>81237993</phone>
+        <email>miketan@gmail.com</email>
+        <address>NUS</address>
+        <favourite>False</favourite>
+        <birthday>05/01/1995</birthday>
+        <tagged>friends</tagged>
+    </persons>
+    <persons>
+        <name>Jacob Lee</name>
+        <phone>94438279</phone>
+        <email>alanturing@gmail.com</email>
+        <address>6 College Avenue East, #13-03</address>
+        <favourite>False</favourite>
+        <birthday>28/06/1997</birthday>
+        <tagged>friends</tagged>
+    </persons>
+    <persons>
+        <name>Shinzo Abbot</name>
+        <phone>86486819</phone>
+        <email>shinzo@gmail.com</email>
+        <address>2 College Avenue West, #01-01</address>
+        <favourite>False</favourite>
+        <birthday>19/02/1999</birthday>
+        <tagged>friends</tagged>
+    </persons>
     <tags>colleagues</tags>
     <tags>classmates</tags>
     <tags>neighbours</tags>
