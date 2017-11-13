@@ -724,6 +724,7 @@ The birthday value added will be displayed in the `ExtendedPersonListPanel` inst
 The facebook mechanism is facilitated by `FacebookCommand`, which resides inside the commands folder of the logic component.
 
 The facebook mechanism displays the Facebook search page of the person specified by the index number inputted.
+// end::facebook[]
 
 image::facebook-command-ui.png[width="800"]
 // tag::facebookcont[]
@@ -745,7 +746,6 @@ The user has to ensure that an internet connection is established to succeed in 
 **Pros:** Saves users the trouble of navigating the facebook log in page. Adheres to the purpose of the application having a CLI. +
 **Cons:** More difficult to implement. May require the use of Facebook API which may cause unexpected regressions that developers may not know how to solve.
 // end::facebookcont[]
-// end::facebook[]
 
 // tag::addremovetag[]
 
