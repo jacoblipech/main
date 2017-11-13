@@ -264,7 +264,7 @@ Expected result: +
 Invalid command format! +
 favourite: Mark the person as favourite by the index number used in the last person listing. +
 Parameters: INDEX (must be a positive integer) +
-Example: favourite OR fav 1
+Example: favourite 1 OR fav 1
 +
 
 * `fav 99999` +
@@ -278,7 +278,7 @@ Expected result: +
 Invalid command format! +
 favourite: Mark the person as favourite by the index number used in the last person listing. +
 Parameters: INDEX (must be a positive integer) +
-Example: favourite OR fav 1
+Example: favourite 1 OR fav 1
 +
 
 
