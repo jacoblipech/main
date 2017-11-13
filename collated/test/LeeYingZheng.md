@@ -1,129 +1,83 @@
 # LeeYingZheng
-###### \java\seedu\address\commons\util\StringUtilTest.java
+###### /java/seedu/address/model/TagContainsKeywordsPredicateTest.java
 ``` java
-    //---------------- Tests for containsTag ------------------------------------------
-
-    /*
-     * Invalid equivalence partitions for word: null, empty
-     * Invalid equivalence partitions for sentence: null
-     * The four test cases below test one invalid input at a time.
-     */
-
-    //overload for taglist, a set of tags
-    private void assertExceptionThrown(Class<? extends Throwable> exceptionClass, Set<Tag> tagList, String word,
-                                       Optional<String> errorMessage) {
-        thrown.expect(exceptionClass);
-        errorMessage.ifPresent(message -> thrown.expectMessage(message));
-        StringUtil.containsTag(tagList, word);
-    }
-
-    public Set<Tag> setupTestTag() {
-        try {
-
-            Set<Tag> testTag = new HashSet<Tag>();
-
-            Tag friend = new Tag("friend");
-            Tag colleague = new Tag("colleague");
-            Tag neighbour = new Tag("neighbour");
-            Tag family = new Tag("family");
-            testTag.add(friend);
-            testTag.add(colleague);
-            testTag.add(neighbour);
-            testTag.add(family);
-
-            return testTag;
-        } catch (IllegalValueException e) {
-            return null;
-        }
-    }
-
-
-    @Test
-    public void containsTag_nullWord_throwsNullPointerException() {
-        Set<Tag> testTag = setupTestTag();
-        assertExceptionThrown(NullPointerException.class, testTag, null, Optional.empty());
-    }
-
-
-    @Test
-    public void containsTag_emptyWord_throwsIllegalArgumentException() {
-        Set<Tag> testTag = setupTestTag();
-        assertExceptionThrown(IllegalArgumentException.class, testTag, "  ",
-                Optional.of("Word parameter cannot be empty"));
-    }
-
-    @Test
-    public void containsTag_nullTags_throwsNullPointerException() {
-        assertExceptionThrown(NullPointerException.class, null, "abc", Optional.empty());
-    }
-
-    /*
-     * Valid equivalence partitions for word:
-     *   - any word
-     *   - word containing symbols/numbers
-     *   - word with leading/trailing spaces
-     *
-     * Possible scenarios returning true:
-     *   - matches any tags of a person, regardless of number of spaces behind the query words
-     *   - if there are multiple words, any words that match any tags of a person
-     *
-     * Possible scenarios returning false:
-     *   - query word does not follow case of the tag word
-     *   - query word matches part of a tag word
-     *   - tags match part of the query word
-     *   - word(s) does not match any of the tags of a person
-     *
-     * The test method below tries to verify all above with a reasonably low number of test cases.
-     */
-
-    @Test
-    public void containsTag_validInputs_correctResult() {
-
-        Set<Tag> testTag = setupTestTag();
-        // Unmatched Tags
-        assertFalse(StringUtil.containsTag(testTag, "abc")); // Boundary case
-        assertFalse(StringUtil.containsTag(testTag, "123"));
-
-        // Matches a partial word only
-        assertFalse(StringUtil.containsTag(testTag, "famil")); // Tag word bigger than query word
-        assertFalse(StringUtil.containsTag(testTag, "neighbours")); // Query word bigger than tag word
-
-        // Matches word in the tags, different upper/lower case letters
-        assertFalse(StringUtil.containsTag(testTag, "Friend")); // incorrect case of query word
-        assertTrue(StringUtil.containsTag(testTag, "family")); // correct case of query word
-        assertTrue(StringUtil.containsTag(testTag, " colleague  ")); // query word contains spaces at its boundaries
-
-        // Matches multiple words in Tags
-        assertTrue(StringUtil.containsTag(testTag , "friend colleague")); // query contains multiple words
-        assertTrue(StringUtil.containsTag(testTag , "family tutor")); //query contains a matched and unmatched word
-    }
-```
-###### \java\seedu\address\logic\commands\FacebookCommandTest.java
-``` java
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static seedu.address.logic.commands.FacebookCommand.SHOWING_FACEBOOK_MESSAGE;
 
-import org.junit.Rule;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.junit.Test;
 
-import seedu.address.commons.events.ui.ShowFacebookRequestEvent;
-import seedu.address.ui.testutil.EventsCollectorRule;
+import seedu.address.model.tag.TagContainsKeywordsPredicate;
+import seedu.address.testutil.PersonBuilder;
 
-public class FacebookCommandTest {
-    @Rule
-    public final EventsCollectorRule eventsCollectorRule = new EventsCollectorRule();
+public class TagContainsKeywordsPredicateTest {
 
     @Test
-    public void execute_facebook_success() {
-        CommandResult result = new FacebookCommand().execute();
-        assertEquals(SHOWING_FACEBOOK_MESSAGE, result.feedbackToUser);
-        assertTrue(eventsCollectorRule.eventsCollector.getMostRecent() instanceof ShowFacebookRequestEvent);
-        assertTrue(eventsCollectorRule.eventsCollector.getSize() == 1);
+    public void equals() {
+        List<String> firstPredicateKeywordList = Collections.singletonList("first");
+        List<String> secondPredicateKeywordList = Arrays.asList("first", "second");
+
+        TagContainsKeywordsPredicate firstPredicate =
+                new TagContainsKeywordsPredicate(firstPredicateKeywordList);
+        TagContainsKeywordsPredicate secondPredicate =
+                new TagContainsKeywordsPredicate(secondPredicateKeywordList);
+
+        // same object -> returns true
+        assertTrue(firstPredicate.equals(firstPredicate));
+
+        // same values -> returns true
+        TagContainsKeywordsPredicate firstPredicateCopy =
+                new TagContainsKeywordsPredicate(firstPredicateKeywordList);
+        assertTrue(firstPredicate.equals(firstPredicateCopy));
+
+        // different types -> returns false
+        assertFalse(firstPredicate.equals(1));
+
+        // null -> returns false
+        assertFalse(firstPredicate.equals(null));
+
+        // different person -> returns false
+        assertFalse(firstPredicate.equals(secondPredicate));
+    }
+
+    @Test
+    public void test_tagContainsKeywords_returnsTrue() {
+        // One keyword
+        TagContainsKeywordsPredicate predicate =
+                new TagContainsKeywordsPredicate(Collections.singletonList("girlfriend"));
+        assertTrue(predicate.test(new PersonBuilder().withTags("hallmate", "girlfriend").build()));
+
+        // Multiple keywords
+        predicate = new TagContainsKeywordsPredicate(Arrays.asList("friend", "hallmate"));
+        assertTrue(predicate.test(new PersonBuilder().withTags("friend").build()));
+
+        // Only one matching keyword
+        predicate = new TagContainsKeywordsPredicate(Arrays.asList("friend", "projectmate"));
+        assertTrue(predicate.test(new PersonBuilder().withTags("projectmate", "senior").build()));
+
+        // Mixed-case keywords
+        predicate = new TagContainsKeywordsPredicate(Arrays.asList("FRIEND", "HALLMATE"));
+        assertFalse(predicate.test(new PersonBuilder().withTags("friend").build()));
+    }
+
+    @Test
+    public void test_tagDoesNotContainKeywords_returnsFalse() {
+        // Zero keywords
+        TagContainsKeywordsPredicate predicate =
+                new TagContainsKeywordsPredicate(Collections.emptyList());
+        assertFalse(predicate.test(new PersonBuilder().withTags("girlfriend").build()));
+
+        // Non-matching keyword
+        predicate = new TagContainsKeywordsPredicate(Arrays.asList("friend"));
+        assertFalse(predicate.test(new PersonBuilder().withTags("tutor", "professor").build()));
+
     }
 }
 ```
-###### \java\seedu\address\logic\commands\FilterCommandTest.java
+###### /java/seedu/address/logic/commands/FilterCommandTest.java
 ``` java
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -224,7 +178,7 @@ public class FilterCommandTest {
     }
 }
 ```
-###### \java\seedu\address\logic\parser\AddressBookParserTest.java
+###### /java/seedu/address/logic/parser/AddressBookParserTest.java
 ``` java
     @Test
     public void parseCommand_clear() throws Exception {
@@ -255,7 +209,7 @@ public class FilterCommandTest {
     }
 
 ```
-###### \java\seedu\address\logic\parser\FilterCommandParserTest.java
+###### /java/seedu/address/logic/parser/FilterCommandParserTest.java
 ``` java
 import static seedu.address.commons.core.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
@@ -291,85 +245,106 @@ public class FilterCommandParserTest {
 
 }
 ```
-###### \java\seedu\address\model\TagContainsKeywordsPredicateTest.java
+###### /java/seedu/address/commons/util/StringUtilTest.java
 ``` java
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+    //---------------- Tests for containsTag ------------------------------------------
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+    /*
+     * Invalid equivalence partitions for word: null, empty
+     * Invalid equivalence partitions for sentence: null
+     * The four test cases below test one invalid input at a time.
+     */
 
-import org.junit.Test;
+    //overload for taglist, a set of tags
+    private void assertExceptionThrown(Class<? extends Throwable> exceptionClass, Set<Tag> tagList, String word,
+                                       Optional<String> errorMessage) {
+        thrown.expect(exceptionClass);
+        errorMessage.ifPresent(message -> thrown.expectMessage(message));
+        StringUtil.containsTag(tagList, word);
+    }
 
-import seedu.address.model.tag.TagContainsKeywordsPredicate;
-import seedu.address.testutil.PersonBuilder;
+    public Set<Tag> setupTestTag() {
+        try {
 
-public class TagContainsKeywordsPredicateTest {
+            Set<Tag> testTag = new HashSet<Tag>();
+
+            Tag friend = new Tag("friend");
+            Tag colleague = new Tag("colleague");
+            Tag neighbour = new Tag("neighbour");
+            Tag family = new Tag("family");
+            testTag.add(friend);
+            testTag.add(colleague);
+            testTag.add(neighbour);
+            testTag.add(family);
+
+            return testTag;
+        } catch (IllegalValueException e) {
+            return null;
+        }
+    }
+
 
     @Test
-    public void equals() {
-        List<String> firstPredicateKeywordList = Collections.singletonList("first");
-        List<String> secondPredicateKeywordList = Arrays.asList("first", "second");
+    public void containsTag_nullWord_throwsNullPointerException() {
+        Set<Tag> testTag = setupTestTag();
+        assertExceptionThrown(NullPointerException.class, testTag, null, Optional.empty());
+    }
 
-        TagContainsKeywordsPredicate firstPredicate =
-                new TagContainsKeywordsPredicate(firstPredicateKeywordList);
-        TagContainsKeywordsPredicate secondPredicate =
-                new TagContainsKeywordsPredicate(secondPredicateKeywordList);
 
-        // same object -> returns true
-        assertTrue(firstPredicate.equals(firstPredicate));
-
-        // same values -> returns true
-        TagContainsKeywordsPredicate firstPredicateCopy =
-                new TagContainsKeywordsPredicate(firstPredicateKeywordList);
-        assertTrue(firstPredicate.equals(firstPredicateCopy));
-
-        // different types -> returns false
-        assertFalse(firstPredicate.equals(1));
-
-        // null -> returns false
-        assertFalse(firstPredicate.equals(null));
-
-        // different person -> returns false
-        assertFalse(firstPredicate.equals(secondPredicate));
+    @Test
+    public void containsTag_emptyWord_throwsIllegalArgumentException() {
+        Set<Tag> testTag = setupTestTag();
+        assertExceptionThrown(IllegalArgumentException.class, testTag, "  ",
+                Optional.of("Word parameter cannot be empty"));
     }
 
     @Test
-    public void test_tagContainsKeywords_returnsTrue() {
-        // One keyword
-        TagContainsKeywordsPredicate predicate =
-                new TagContainsKeywordsPredicate(Collections.singletonList("girlfriend"));
-        assertTrue(predicate.test(new PersonBuilder().withTags("hallmate", "girlfriend").build()));
-
-        // Multiple keywords
-        predicate = new TagContainsKeywordsPredicate(Arrays.asList("friend", "hallmate"));
-        assertTrue(predicate.test(new PersonBuilder().withTags("friend").build()));
-
-        // Only one matching keyword
-        predicate = new TagContainsKeywordsPredicate(Arrays.asList("friend", "projectmate"));
-        assertTrue(predicate.test(new PersonBuilder().withTags("projectmate", "senior").build()));
-
-        // Mixed-case keywords
-        predicate = new TagContainsKeywordsPredicate(Arrays.asList("FRIEND", "HALLMATE"));
-        assertFalse(predicate.test(new PersonBuilder().withTags("friend").build()));
+    public void containsTag_nullTags_throwsNullPointerException() {
+        assertExceptionThrown(NullPointerException.class, null, "abc", Optional.empty());
     }
+
+    /*
+     * Valid equivalence partitions for word:
+     *   - any word
+     *   - word containing symbols/numbers
+     *   - word with leading/trailing spaces
+     *
+     * Possible scenarios returning true:
+     *   - matches any tags of a person, regardless of number of spaces behind the query words
+     *   - if there are multiple words, any words that match any tags of a person
+     *
+     * Possible scenarios returning false:
+     *   - query word does not follow case of the tag word
+     *   - query word matches part of a tag word
+     *   - tags match part of the query word
+     *   - word(s) does not match any of the tags of a person
+     *
+     * The test method below tries to verify all above with a reasonably low number of test cases.
+     */
 
     @Test
-    public void test_tagDoesNotContainKeywords_returnsFalse() {
-        // Zero keywords
-        TagContainsKeywordsPredicate predicate =
-                new TagContainsKeywordsPredicate(Collections.emptyList());
-        assertFalse(predicate.test(new PersonBuilder().withTags("girlfriend").build()));
+    public void containsTag_validInputs_correctResult() {
 
-        // Non-matching keyword
-        predicate = new TagContainsKeywordsPredicate(Arrays.asList("friend"));
-        assertFalse(predicate.test(new PersonBuilder().withTags("tutor", "professor").build()));
+        Set<Tag> testTag = setupTestTag();
+        // Unmatched Tags
+        assertFalse(StringUtil.containsTag(testTag, "abc")); // Boundary case
+        assertFalse(StringUtil.containsTag(testTag, "123"));
 
+        // Matches a partial word only
+        assertFalse(StringUtil.containsTag(testTag, "famil")); // Tag word bigger than query word
+        assertFalse(StringUtil.containsTag(testTag, "neighbours")); // Query word bigger than tag word
+
+        // Matches word in the tags, different upper/lower case letters
+        assertFalse(StringUtil.containsTag(testTag, "Friend")); // incorrect case of query word
+        assertTrue(StringUtil.containsTag(testTag, "family")); // correct case of query word
+        assertTrue(StringUtil.containsTag(testTag, " colleague  ")); // query word contains spaces at its boundaries
+
+        // Matches multiple words in Tags
+        assertTrue(StringUtil.containsTag(testTag , "friend colleague")); // query contains multiple words
+        assertTrue(StringUtil.containsTag(testTag , "family tutor")); //query contains a matched and unmatched word
     }
-}
 ```
-###### \java\systemtests\AddCommandSystemTest.java
+###### /java/systemtests/AddCommandSystemTest.java
 ``` java
         /* Case: add a person without tags to a non-empty address book, command with leading spaces and trailing spaces
          * -> added
@@ -531,7 +506,6 @@ public class TagContainsKeywordsPredicateTest {
         assertApplicationDisplaysExpected("" , expectedResultMessage, expectedModel);
         assertSelectedCardUnchanged();
         assertCommandBoxShowsDefaultStyle();
-        assertStatusBarUnchangedExceptSyncStatus();
     }
 
     /**
@@ -568,7 +542,7 @@ public class TagContainsKeywordsPredicateTest {
     }
 }
 ```
-###### \java\systemtests\FilterCommandSystemTest.java
+###### /java/systemtests/FilterCommandSystemTest.java
 ``` java
 import static seedu.address.commons.core.Messages.MESSAGE_PERSONS_LISTED_OVERVIEW;
 import static seedu.address.commons.core.Messages.MESSAGE_UNKNOWN_COMMAND;
