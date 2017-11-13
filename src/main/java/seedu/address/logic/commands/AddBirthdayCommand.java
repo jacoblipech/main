@@ -98,7 +98,7 @@ public class AddBirthdayCommand extends UndoableCommand {
     }
 
     private void checkDuplicateBirthday(String birthday) throws CommandException {
-        if(!Objects.equals(birthday, Birthday.DEFAULT_BIRTHDAY)) {
+        if (!Objects.equals(birthday, Birthday.DEFAULT_BIRTHDAY)) {
             throw new CommandException(MESSAGE_DUPLICATE_BIRTHDAY);
         }
     }
