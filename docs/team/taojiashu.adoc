@@ -154,7 +154,7 @@ Format: `addMemory INDEX m/Memory`
 ==== Justification
 
 This feature will definitely make our product stand out from other address book applications. With this feature, users will be able to add their unique memories with their contacts,
-so that they can look back at their memorable moments with certain persons if you want to. In this way, if they ever forgot who the person is in UniCity, they would be able to recall after looking at their memories.
+so that they can look back at their memorable moments with certain persons if they want to. In this way, if they ever forgot who the person is in UniCity, they would be able to recall after looking at their memories.
 
 === Code Contributed
 https://github.com/CS2103AUG2017-W13-B1/main/blob/master/collated/main/taojiashu.md[Functional Code] +
