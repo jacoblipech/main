@@ -10,7 +10,7 @@
 
 <VBox id="cardPane" fx:id="cardPane" minHeight="120" minWidth="150" prefHeight="416.0" prefWidth="160.0" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1">
     <children>
-    <Label fx:id="name" styleClass="cell_big_label" text="\$name">
+    <Label fx:id="name" styleClass="cell_big_label" text="-">
         <graphic>
             <ImageView fitHeight="20.0" fitWidth="20.0">
                 <image>
@@ -22,7 +22,7 @@
             <Insets bottom="5.5" />
         </padding>
     </Label>
-    <Label fx:id="phone" styleClass="cell_small_label" text="\$phone">
+    <Label fx:id="phone" styleClass="cell_small_label" text="-">
       <graphic>
               <ImageView fitHeight="20.0" fitWidth="20.0">
                   <image>
@@ -34,7 +34,7 @@
             <Insets bottom="5.5" />
         </padding>
     </Label>
-    <Label fx:id="email" styleClass="cell_small_label" text="\$email">
+    <Label fx:id="email" styleClass="cell_small_label" text="-">
       <graphic>
               <ImageView fitHeight="20.0" fitWidth="20.0">
                   <image>
@@ -46,7 +46,7 @@
             <Insets bottom="5.5" />
         </padding>
     </Label>
-    <Label fx:id="address" styleClass="cell_small_label" text="\$address">
+    <Label fx:id="address" styleClass="cell_small_label" text="-">
       <graphic>
               <ImageView fitHeight="20.0" fitWidth="20.0">
                   <image>
@@ -58,7 +58,7 @@
             <Insets bottom="5.5" />
         </padding>
     </Label>
-    <Label fx:id="birthday" styleClass="cell_small_label" text="\$birthday">
+    <Label fx:id="birthday" styleClass="cell_small_label" text="-">
       <graphic>
               <ImageView fitHeight="20.0" fitWidth="20.0">
                   <image>
