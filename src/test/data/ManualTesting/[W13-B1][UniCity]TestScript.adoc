@@ -94,12 +94,12 @@ Expected result: 3 persons listed!
 The person panel list will display three persons that have `colleagues` tag.
 
 * `filter friends` +
-Expected result: 9 persons listed!
+Expected result: 5 persons listed!
 +
 The person panel list will display five persons that have `friends` tag.
 
 * `filter friends colleagues` +
-Expected result: 11 persons listed!
+Expected result: 8 persons listed!
 +
 The person panel list will display eight persons that have either the `colleagues` or `friends` tag, or both.
 
@@ -333,6 +333,22 @@ Parameters: INDEX (must be a positive integer) +
 Example: favourite 1 OR fav 1
 +
 
+=== Sort Command
+* `sort` +
+Expected result: all the contacts will be sorted in alphabetically order
+
+=== Add Birthday Command
+* `birthday 99999 b/05/24/1994` +
+Expected result: The person index provided is invalid
++
+* `birthday 1 b/b/05/24` +
+Expected result: Birthdays should be numeric in the format DD/MM/YY or DD/MM/YYYY.
++
+* `birthday 1 b/20/10/1994 +
+Expected result: the person indexed 1 will be have its default birthday changed to 20/10/1994
++
+[NOTE]
+This birthday of the contact will only be changed if it has the default value originally. If a birthday already exists in the field, you need to use the edit command instead.
 
 === List all favourite person
 
