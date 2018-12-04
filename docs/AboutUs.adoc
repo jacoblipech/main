@@ -32,7 +32,7 @@ Also in charge of Storage component.
 
 === Jacob
 image::jacoblipech.png[width="150", align="left"]
-{empty}[http://github.com/jacoblipech[github]]
+{empty}[http://github.com/jacoblipech[github]][https://cs2103aug2017-w13-b1.github.io/main/team/jacoblipech.html[portfolio]]
 
 Role: Documentation and Intellij Expert +
 Responsibilities: Ensures all changes to UniCity is documented in good quality and helps out
